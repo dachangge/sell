@@ -54,8 +54,8 @@ public class ProductCategoryRepositoryTest {
     public void findByCategoryTypeInTest(){
         List<Integer> list = Arrays.asList(3,4,5);
         List<ProductCategory> result = repository.findByCategoryTypeIn(list);
-        Assert.assertNotEquals(0,result.size());
-
+        Assert.assertNotEquals(0, result.size());
+        
 
     }
 
