@@ -24,7 +24,7 @@ public class ProductInfoRepositoryTest {
 
     @Test
     public void save(){
-        ProductInfo product = ProductInfo.builder().categoryType(6).productDescription("不错呦").productIcon("http://xxx.png").productName("coco").productPrice(new BigDecimal(16.00)).productStatus(0).productStock(123).build();
+        ProductInfo product = ProductInfo.builder().categoryType(5).productDescription("香脆爽！！！").productIcon("http://xxx.png").productName("麦辣鸡翅").productPrice(new BigDecimal(10.80)).productStatus(0).productStock(200).build();
         ProductInfo result = repository.save(product);
         Assert.assertNotNull(result);
     }
