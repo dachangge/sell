@@ -19,5 +19,11 @@ public interface OrderService  {
     //取消列表
     OrderDTO cancel(OrderDTO orderDTO);
 
+    //完結訂單
+    OrderDTO finish(OrderDTO orderDTO);
+
+    //支付訂單
+    OrderDTO paid(OrderDTO orderDTO);
+
 
 }

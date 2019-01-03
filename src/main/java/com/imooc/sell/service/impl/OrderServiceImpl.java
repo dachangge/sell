@@ -14,6 +14,7 @@ import com.imooc.sell.repository.OrderMasterRepository;
 import com.imooc.sell.service.OrderService;
 import com.imooc.sell.service.ProductInfoService;
 import com.imooc.sell.utils.KeyUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,10 +29,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
     ProductInfoService productInfoService;
+
+
 
     @Autowired
     OrderDetailRepository orderDetailRepository;
@@ -61,7 +65,8 @@ public class OrderServiceImpl implements OrderService {
         }
         //订单主题入库
         OrderMaster orderMaster = OrderMaster.builder().orderAmount(orderAmount).buyerPhone(orderDTO.getBuyerPhone()).buyerOpenid(orderDTO.getBuyerOpenid()).buyerName(orderDTO.getBuyerName()).buyerAddress(orderDTO.getBuyerAddress()).orderId(orderId).orderStatus(OrderStatusEnum.NEW.getCode()).orderId(orderId).payStatus(PayStatusEnum.NOPAY.getCode()).build();
-        orderMasterRepository.save(orderMaster);
+        OrderMaster master = orderMasterRepository.save(orderMaster);
+        orderDTO.setOrderId(master.getOrderId());
 
         //商品减少库存
 
@@ -105,6 +110,7 @@ public class OrderServiceImpl implements OrderService {
 
         //先判断状态 是否未新下单
         if(!orderDTO.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())){
+            log.error("订单状态错误,orderId={},orderStatus={}",orderDTO.getOrderId(), orderDTO.getOrderStatus());
             throw new SellException(ResultEnum.ORDER_STATUS_ERROR);
         }
         //更新狀態
@@ -114,7 +120,7 @@ public class OrderServiceImpl implements OrderService {
 
         OrderMaster result = orderMasterRepository.save(orderMaster);
         if(result == null){
-            throw  new SellException(ResultEnum.ORDER_STATUS_ERROR);
+            throw  new SellException(ResultEnum.UPDATE_ORDER_FAILED);
         }
 
         //返回庫存
@@ -124,7 +130,52 @@ public class OrderServiceImpl implements OrderService {
         if(orderDTO.getPayStatus().equals(PayStatusEnum.PAYED)){
             //TODO:退款操作
         }
+        return orderDTO;
+    }
 
+    @Override
+    public OrderDTO finish(OrderDTO orderDTO) {
+        //先判断状态 是否未新下单
+        if(!orderDTO.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())){
+            log.error("订单状态错误,orderId={},orderStatus={}",orderDTO.getOrderId(), orderDTO.getOrderStatus());
+            throw new SellException(ResultEnum.ORDER_STATUS_ERROR);
+        }
+
+        //更新狀態
+        orderDTO.setOrderStatus(OrderStatusEnum.FINISH.getCode());
+        OrderMaster orderMaster = new OrderMaster();
+        BeanUtils.copyProperties(orderDTO, orderMaster);
+
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+        if(result == null){
+            throw  new SellException(ResultEnum.UPDATE_ORDER_FAILED);
+        }
+
+        return orderDTO;
+    }
+
+    @Override
+    public OrderDTO paid(OrderDTO orderDTO) {
+
+        //先判断状态 是否未新下单
+        if(!orderDTO.getOrderStatus().equals(OrderStatusEnum.NEW.getCode())){
+            log.error("订单状态错误,orderId={},orderStatus={}",orderDTO.getOrderId(), orderDTO.getOrderStatus());
+            throw new SellException(ResultEnum.ORDER_STATUS_ERROR);
+        }
+        //判斷是否未支付
+        if(!orderDTO.getPayStatus().equals(PayStatusEnum.NOPAY.getCode())){
+            throw new SellException(ResultEnum.PAY_STATUS_ERROR);
+        }
+
+        //更新状态
+        orderDTO.setPayStatus(PayStatusEnum.PAYED.getCode());
+        OrderMaster orderMaster = new OrderMaster();
+        BeanUtils.copyProperties(orderDTO, orderMaster);
+
+        OrderMaster result = orderMasterRepository.save(orderMaster);
+        if(result == null){
+            throw  new SellException(ResultEnum.UPDATE_ORDER_FAILED);
+        }
 
         return orderDTO;
     }
