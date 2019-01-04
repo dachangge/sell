@@ -10,4 +10,12 @@ public class ResultVOUtil {
         resultVO.setData(obj);
         return resultVO;
     }
+
+    public static ResultVO success(){
+        ResultVO<Object> resultVO = new ResultVO<>();
+        resultVO.setCode(0);
+        resultVO.setMsg("成功");
+        return resultVO;
+    }
+
 }

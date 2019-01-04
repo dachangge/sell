@@ -66,4 +66,24 @@ public class BuyerOrderController {
         map.put("data", result.getContent());
         return  ResultVOUtil.success(map);
     }
+
+    //订单详情
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
+    public ResultVO detail(@RequestParam(value = "openid", required = true) String openid, @RequestParam(value="orderId" , required =  true) String orderId){
+        //TODO：不安全的做法，要改进
+        OrderDTO orderDTO = orderService.findOne(orderId);
+
+        return  ResultVOUtil.success(orderDTO);
+    }
+
+    //取消订单
+    @RequestMapping(value = "/cancel", method = RequestMethod.POST)
+    public ResultVO cancel(@RequestParam(value = "openid", required = true) String openid, @RequestParam(value="orderId" , required =  true) String orderId){
+        //TODO：不安全的做法，要改进
+        OrderDTO orderDTO = orderService.findOne(orderId);
+
+        orderService.cancel(orderDTO);
+
+        return  ResultVOUtil.success();
+    }
 }

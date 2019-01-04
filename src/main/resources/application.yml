@@ -9,6 +9,6 @@ spring:
   jackson:
     default-property-inclusion: non_null
 server:
+  port: 7000
   servlet:
     context-path: /sell
-  port: 7000
